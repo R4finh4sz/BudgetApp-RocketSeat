@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "BudgetApp-RocketSeat",
+    "slug": "BudgetApp-RocketSeat",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/expo/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "scheme": "BudgetApp-RocketSeat",
+    "splash": {
+      "image": "./src/assets/expo/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/expo/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.r4finh4sz.BudgetApp-RocketSeat"
+    },
+    "web": {
+      "favicon": "./src/assets/expo/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": ["expo-font", "expo-router"]
+  }
+}

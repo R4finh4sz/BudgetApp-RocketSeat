@@ -1,0 +1,19 @@
+# Dependências
+node_modules/
+
+# Build
+dist/
+build/
+.expo/
+
+# Logs
+*.log
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Configs
+*.lock
+yarn.lock
+package-lock.json
