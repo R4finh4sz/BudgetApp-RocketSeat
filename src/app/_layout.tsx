@@ -6,6 +6,7 @@ import {
   OpenSans_600SemiBold,
 } from '@expo-google-fonts/open-sans';
 import {useEffect} from 'react';
+import {KeyboardProvider} from 'react-native-keyboard-controller';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -26,7 +27,7 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <KeyboardProvider>
       <StatusBar style="dark" />
       <Stack
         screenOptions={{
@@ -34,6 +35,6 @@ export default function RootLayout() {
           animation: 'slide_from_right',
         }}
       />
-    </>
+    </KeyboardProvider>
   );
 }

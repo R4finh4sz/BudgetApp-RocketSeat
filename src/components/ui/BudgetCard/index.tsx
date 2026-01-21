@@ -1,15 +1,15 @@
-import { StyleSheet, Text, View } from 'react-native';
+import {Text, View} from 'react-native';
 
-import { BudgetItem } from '../../../Interfaces/HomeInterfaces';
-import { formatCurrency } from '../../../utils/formatCurrency';
-import { StatusBadge } from '@/src/components/ui/StatusBadge';
-import { styles } from './styles';
+import {BudgetItem} from '../../../Interfaces/HomeInterfaces';
+import {formatCurrency} from '../../../utils/formatCurrency';
+import {StatusBadge} from '@/src/components/ui/StatusBadge';
+import {styles} from './styles';
 
 type Props = {
   item: BudgetItem;
 };
 
-export function BudgetCard({ item }: Props) {
+export function BudgetCard({item}: Props) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -26,4 +26,3 @@ export function BudgetCard({ item }: Props) {
     </View>
   );
 }
-
