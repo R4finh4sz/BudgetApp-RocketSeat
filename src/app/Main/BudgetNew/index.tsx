@@ -1,38 +1,21 @@
 import {useMemo, useState} from 'react';
-import {
-  Modal,
-  Pressable,
-  Text,
-  TextInput,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import {Alert} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {
-  Briefcase,
-  CaretLeft,
-  Check,
-  Minus,
-  Plus,
-  Tag,
-  TrashSimple,
-  X,
-} from 'phosphor-react-native';
 import {useRouter} from 'expo-router';
-import {CreditCard, Store} from 'lucide-react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-controller';
 
-import theme from '@/src/Global/theme';
-import {FormInput} from '@/src/components/ui/FormInput';
-import {FormSection} from '@/src/components/ui/FormSection';
-import {ServiceItemRow} from '@/src/components/ui/ServiceItemRow';
-import {StatusOption} from '@/src/components/ui/StatusOption';
 import {BudgetStatus} from '@/src/Interfaces/HomeInterfaces';
 import {saveBudget} from '@/src/storage/budgets';
-import {formatCurrency} from '@/src/utils/formatCurrency';
-import {styles} from './styles';
+import {budgetGeneralInfoSchema} from '@/src/Validation/BudgetNew.validation';
 
-const STATUS_ORDER: BudgetStatus[] = ['draft', 'approved', 'sent', 'rejected'];
+import {styles} from './styles';
+import {BudgetFormActions} from '@/src/components/Screens/Budgetnew/BudgetFormActions';
+import {InvestmentSummary} from '@/src/components/Screens/Budgetnew/InvestmentSummary';
+import {BudgetHeader} from '@/src/components/ui/BudgetHeader';
+import {GeneralInfoSection} from '@/src/components/ui/GeneralInfoSection';
+import {ServiceBottomSheet} from '@/src/components/ui/ServiceBottomSheet';
+import {ServicesSection} from '@/src/components/ui/ServicesSection';
+import {StatusSection} from '@/src/components/ui/StatusSection';
 
 type ServiceItem = {
   id: string;
@@ -57,6 +40,10 @@ export default function BudgetNew() {
   const [serviceAmount, setServiceAmount] = useState('');
   const [serviceQuantity, setServiceQuantity] = useState(1);
 
+  // Estados para mensagens de erro
+  const [titleError, setTitleError] = useState('');
+  const [clientError, setClientError] = useState('');
+
   const itemsCount = useMemo(
     () => services.reduce((total, item) => total + item.quantity, 0),
     [services],
@@ -72,6 +59,17 @@ export default function BudgetNew() {
     () => subtotal - discountAmount,
     [subtotal, discountAmount],
   );
+
+  // Limpa erros ao digitar
+  const handleTitleChange = (value: string) => {
+    setTitle(value);
+    if (titleError) setTitleError('');
+  };
+
+  const handleClientChange = (value: string) => {
+    setClient(value);
+    if (clientError) setClientError('');
+  };
 
   const openNewService = () => {
     setEditingServiceId(null);
@@ -119,7 +117,48 @@ export default function BudgetNew() {
     setIsServiceSheetOpen(false);
   };
 
+  const handleDecreaseQty = () => {
+    setServiceQuantity(prev => (prev > 1 ? prev - 1 : 1));
+  };
+
+  const handleIncreaseQty = () => {
+    setServiceQuantity(prev => prev + 1);
+  };
+
+  const validateForm = () => {
+    setTitleError('');
+    setClientError('');
+
+    const result = budgetGeneralInfoSchema.safeParse({
+      title,
+      client,
+    });
+
+    if (!result.success) {
+      const errors = result.error.flatten().fieldErrors;
+
+      if (errors.title?.[0]) {
+        setTitleError(errors.title[0]);
+      }
+      if (errors.client?.[0]) {
+        setClientError(errors.client[0]);
+      }
+
+      Alert.alert(
+        'Campos obrigatórios',
+        'Preencha o título e o cliente antes de salvar o orçamento',
+      );
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSaveBudget = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
     const now = new Date().toISOString();
     await saveBudget({
       id: String(Date.now()),
@@ -142,191 +181,54 @@ export default function BudgetNew() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
-        <View style={styles.headerRow}>
-          <Pressable style={styles.backButton} onPress={() => router.back()}>
-            <CaretLeft size={20} color={theme.COLORS.TEXT_CONTRAST} />
-          </Pressable>
-          <Text style={styles.headerTitle}>Orcamento</Text>
-          <View style={styles.headerSpacer} />
-        </View>
+        <BudgetHeader title="Orcamento" onBack={() => router.back()} />
 
-        <FormSection
-          title="Informacoes gerais"
-          icon={<Store size={16} color={theme.COLORS.PURPLE_BASE} />}>
-          <FormInput
-            value={title}
-            onChangeText={setTitle}
-            placeholder="Titulo"
-            style={styles.inputSpacing}
-          />
-          <FormInput
-            value={client}
-            onChangeText={setClient}
-            placeholder="Cliente"
-          />
-        </FormSection>
+        <GeneralInfoSection
+          title={title}
+          client={client}
+          onChangeTitle={handleTitleChange}
+          onChangeClient={handleClientChange}
+          titleError={titleError}
+          clientError={clientError}
+        />
 
-        <FormSection
-          title="Status"
-          icon={<Tag size={16} color={theme.COLORS.PURPLE_BASE} />}>
-          <View style={styles.statusGrid}>
-            {STATUS_ORDER.map(option => (
-              <View key={option} style={styles.statusItem}>
-                <StatusOption
-                  status={option}
-                  selected={status === option}
-                  onPress={() => setStatus(option)}
-                />
-              </View>
-            ))}
-          </View>
-        </FormSection>
+        <StatusSection selectedStatus={status} onStatusChange={setStatus} />
 
-        <FormSection
-          title="Servicos inclusos"
-          icon={<Briefcase size={16} color={theme.COLORS.PURPLE_BASE} />}>
-          {services.map((service, index) => (
-            <ServiceItemRow
-              key={service.id}
-              title={service.title}
-              description={service.description}
-              amount={service.amount}
-              quantity={service.quantity}
-              isLast={index === services.length - 1}
-              onEdit={() => openEditService(service)}
-            />
-          ))}
-          <Pressable style={styles.addButton} onPress={openNewService}>
-            <Plus size={18} color={theme.COLORS.PURPLE_BASE} />
-            <Text style={styles.addButtonText}>Adicionar servico</Text>
-          </Pressable>
-        </FormSection>
+        <ServicesSection
+          services={services}
+          onAddService={openNewService}
+          onEditService={openEditService}
+        />
 
-        <FormSection
-          title="Investimento"
-          icon={<CreditCard size={16} color={theme.COLORS.PURPLE_BASE} />}>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Subtotal</Text>
-            <View style={styles.summaryMeta}>
-              <Text style={styles.summaryMetaText}>{itemsCount} itens</Text>
-              <Text style={styles.summaryValue}>
-                {formatCurrency(subtotal)}
-              </Text>
-            </View>
-          </View>
+        <InvestmentSummary
+          itemsCount={itemsCount}
+          subtotal={subtotal}
+          discountPercent={discountPercent}
+          discountAmount={discountAmount}
+          total={total}
+        />
 
-          <View style={styles.summaryRow}>
-            <View style={styles.discountLabel}>
-              <Text style={styles.summaryLabel}>Desconto</Text>
-              <View style={styles.discountBadge}>
-                <Text style={styles.discountBadgeText}>
-                  {discountPercent} %
-                </Text>
-              </View>
-            </View>
-            <Text style={styles.summaryValueDanger}>
-              - {formatCurrency(discountAmount)}
-            </Text>
-          </View>
-
-          <View style={[styles.summaryRow, styles.totalRow]}>
-            <Text style={styles.totalLabel}>Valor total</Text>
-            <Text style={styles.totalValue}>{formatCurrency(total)}</Text>
-          </View>
-        </FormSection>
-        <View style={styles.footer}>
-          <Pressable
-            style={styles.secondaryButton}
-            onPress={() => router.back()}>
-            <Text style={styles.secondaryButtonText}>Cancelar</Text>
-          </Pressable>
-          <Pressable style={styles.primaryButton} onPress={handleSaveBudget}>
-            <Text style={styles.primaryButtonText}>Salvar</Text>
-          </Pressable>
-        </View>
+        <BudgetFormActions
+          onCancel={() => router.back()}
+          onSave={handleSaveBudget}
+        />
       </KeyboardAwareScrollView>
 
-      <Modal transparent visible={isServiceSheetOpen} animationType="slide">
-        <View style={styles.sheetRoot}>
-          <TouchableWithoutFeedback
-            onPress={() => setIsServiceSheetOpen(false)}>
-            <View style={styles.sheetBackdrop} />
-          </TouchableWithoutFeedback>
-          <KeyboardAwareScrollView
-            contentContainerStyle={styles.sheetContainer}
-            keyboardShouldPersistTaps="handled">
-            <View style={styles.sheetHeader}>
-              <Text style={styles.sheetTitle}>Servico</Text>
-              <Pressable
-                onPress={() => setIsServiceSheetOpen(false)}
-                hitSlop={12}>
-                <X size={20} color={theme.COLORS.TEXT_MUTED} />
-              </Pressable>
-            </View>
-
-            <TextInput
-              value={serviceTitle}
-              onChangeText={setServiceTitle}
-              placeholder="Design de interfaces"
-              placeholderTextColor={theme.COLORS.TEXT_MUTED}
-              style={styles.sheetInput}
-            />
-
-            <TextInput
-              value={serviceDescription}
-              onChangeText={setServiceDescription}
-              placeholder="Criacao de wireframes e prototipos de alta fidelidade"
-              placeholderTextColor={theme.COLORS.TEXT_MUTED}
-              style={[styles.sheetInput, styles.sheetTextarea]}
-              multiline
-            />
-
-            <View style={styles.sheetRow}>
-              <View style={styles.sheetMoneyField}>
-                <Text style={styles.sheetCurrency}>R$</Text>
-                <TextInput
-                  value={serviceAmount}
-                  onChangeText={setServiceAmount}
-                  placeholder="0,00"
-                  placeholderTextColor={theme.COLORS.TEXT_MUTED}
-                  keyboardType="numeric"
-                  style={styles.sheetMoneyInput}
-                />
-              </View>
-
-              <View style={styles.sheetQtyField}>
-                <Pressable
-                  style={styles.sheetQtyButton}
-                  onPress={() =>
-                    setServiceQuantity(prev => (prev > 1 ? prev - 1 : 1))
-                  }>
-                  <Minus size={16} color={theme.COLORS.PURPLE_BASE} />
-                </Pressable>
-                <Text style={styles.sheetQtyText}>{serviceQuantity}</Text>
-                <Pressable
-                  style={styles.sheetQtyButton}
-                  onPress={() => setServiceQuantity(prev => prev + 1)}>
-                  <Plus size={16} color={theme.COLORS.PURPLE_BASE} />
-                </Pressable>
-              </View>
-            </View>
-
-            <View style={styles.sheetActions}>
-              <Pressable
-                style={styles.sheetDeleteButton}
-                onPress={handleDeleteService}>
-                <TrashSimple size={18} color={theme.COLORS.DANGER_BASE} />
-              </Pressable>
-              <Pressable
-                style={styles.sheetSaveButton}
-                onPress={handleSaveService}>
-                <Check size={18} color={theme.COLORS.BACKGROUND_ELEVATED} />
-                <Text style={styles.sheetSaveButtonText}>Salvar</Text>
-              </Pressable>
-            </View>
-          </KeyboardAwareScrollView>
-        </View>
-      </Modal>
+      <ServiceBottomSheet
+        visible={isServiceSheetOpen}
+        title={serviceTitle}
+        description={serviceDescription}
+        amount={serviceAmount}
+        quantity={serviceQuantity}
+        onClose={() => setIsServiceSheetOpen(false)}
+        onChangeTitle={setServiceTitle}
+        onChangeDescription={setServiceDescription}
+        onChangeAmount={setServiceAmount}
+        onDecreaseQty={handleDecreaseQty}
+        onIncreaseQty={handleIncreaseQty}
+        onDelete={handleDeleteService}
+        onSave={handleSaveService}
+      />
     </SafeAreaView>
   );
 }

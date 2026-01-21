@@ -1,24 +1,20 @@
-import React from 'react';
-import {TextInput, TextStyle} from 'react-native';
-
+import {Text, TextInput, View, StyleSheet, TextInputProps} from 'react-native';
 import theme from '@/src/Global/theme';
 import {styles} from './styles';
 
-type Props = {
-  value: string;
-  placeholder: string;
-  onChangeText: (value: string) => void;
-  style?: TextStyle;
+type Props = TextInputProps & {
+  error?: string;
 };
 
-export function FormInput({value, placeholder, onChangeText, style}: Props) {
+export function FormInput({error, style, ...rest}: Props) {
   return (
-    <TextInput
-      value={value}
-      onChangeText={onChangeText}
-      placeholder={placeholder}
-      placeholderTextColor={theme.COLORS.TEXT_MUTED}
-      style={[styles.input, style]}
-    />
+    <View>
+      <TextInput
+        style={[styles.input, error && styles.inputError, style]}
+        placeholderTextColor={theme.COLORS.TEXT_MUTED}
+        {...rest}
+      />
+      {error && <Text style={styles.inputError}>{error}</Text>}
+    </View>
   );
 }
