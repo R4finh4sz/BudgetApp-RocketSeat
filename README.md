@@ -129,3 +129,10 @@ https://linkedin.com/in/R4finh4sz
 📄 Licença
 
 MIT License
+
+<p align="center">
+  <img src="./Images/Image1.png" width="220" />
+  <img src="./Images/Image2.png" width="220" />
+  <img src="./Images/Image3.png" width="220" />
+  <img src="./Images/Image4.png" width="220" />
+</p>
