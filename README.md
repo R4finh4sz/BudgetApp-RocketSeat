@@ -1,14 +1,10 @@
-====================================================
 📱 Budget Manager App
-====================================================
 
 Aplicativo mobile para criação, gerenciamento e
 compartilhamento de orçamentos, desenvolvido em
 React Native com Expo.
 
-====================================================
 ✨ Funcionalidades
-====================================================
 
 - Criar orçamentos
 - Editar informações gerais
@@ -23,9 +19,7 @@ React Native com Expo.
 - Persistência local
 - Layout moderno e responsivo
 
-====================================================
 🧱 Tecnologias Utilizadas
-====================================================
 
 - React Native
 - Expo
@@ -39,9 +33,7 @@ React Native com Expo.
 - Zod
 - Safe Area Context
 
-====================================================
 🚀 Instalação
-====================================================
 
 1. Clonar o repositório
 
@@ -67,9 +59,7 @@ npx expo install
 
 npx expo start
 
-====================================================
 📦 Dependências principais
-====================================================
 
 npx expo install \
 @react-native-async-storage/async-storage \
@@ -79,9 +69,7 @@ react-native-mask-input \
 lucide-react-native \
 phosphor-react-native
 
-====================================================
 💰 Tratamento de valores monetários
-====================================================
 
 Formato brasileiro:
 
@@ -95,9 +83,7 @@ Função responsável:
 
 parseBRLCurrencyToNumber()
 
-====================================================
 📤 Compartilhamento
-====================================================
 
 Utiliza API nativa:
 
@@ -105,9 +91,7 @@ import { Share } from 'react-native';
 
 Não requer instalação adicional.
 
-====================================================
 🧪 Validações
-====================================================
 
 - Campos obrigatórios
 - Valor maior que zero
@@ -115,9 +99,7 @@ Não requer instalação adicional.
 - Validação com Zod
 - Alertas e feedback visual
 
-====================================================
 🔐 Persistência
-====================================================
 
 Armazenamento local via AsyncStorage
 
@@ -125,9 +107,7 @@ Chave utilizada:
 
 @budgets
 
-====================================================
 📌 Próximas melhorias
-====================================================
 
 - Edição completa de orçamento
 - Exportação em PDF
@@ -136,9 +116,7 @@ Chave utilizada:
 - Autenticação
 - Tema escuro
 
-====================================================
 🧑‍💻 Autor
-====================================================
 
 Rafael Souza Santana
 
@@ -148,10 +126,6 @@ https://github.com/R4finh4sz
 LinkedIn:
 https://linkedin.com/in/R4finh4sz
 
-====================================================
 📄 Licença
-====================================================
 
 MIT License
-
-====================================================
