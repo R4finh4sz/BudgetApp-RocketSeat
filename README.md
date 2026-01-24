@@ -130,9 +130,7 @@ https://linkedin.com/in/R4finh4sz
 
 MIT License
 
-<p align="center">
-  <img src="./Images/Image1.png" width="220" />
-  <img src="./Images/Image2.png" width="220" />
-  <img src="./Images/Image3.png" width="220" />
-  <img src="./Images/Image4.png" width="220" />
-</p>
+<img width="359" height="773" alt="Image" src="https://github.com/user-attachments/assets/13f48385-1b0e-46ae-bdfc-8694cd5d1c6c" />
+<img width="362" height="775" alt="Image" src="https://github.com/user-attachments/assets/bec25fd5-aa5f-46ad-8d02-2d6eb9429a84" />
+<img width="357" height="777" alt="Image" src="https://github.com/user-attachments/assets/d6402892-4e62-48eb-94d6-719db35dc110" />
+<img width="362" height="778" alt="Image" src="https://github.com/user-attachments/assets/12343c5b-3ca2-48a7-87f1-77633589ee93" />
