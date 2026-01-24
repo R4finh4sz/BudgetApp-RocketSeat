@@ -1,3 +1,4 @@
+// BudgetNew.tsx
 import {useMemo, useState} from 'react';
 import {Alert} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -16,6 +17,7 @@ import {GeneralInfoSection} from '@/src/components/ui/GeneralInfoSection';
 import {ServiceBottomSheet} from '@/src/components/ui/ServiceBottomSheet';
 import {ServicesSection} from '@/src/components/ui/ServicesSection';
 import {StatusSection} from '@/src/components/ui/StatusSection';
+import {parseBRLCurrencyToNumber} from '@/src/utils/parseBRLCurrencyToNumber';
 
 type ServiceItem = {
   id: string;
@@ -40,7 +42,6 @@ export default function BudgetNew() {
   const [serviceAmount, setServiceAmount] = useState('');
   const [serviceQuantity, setServiceQuantity] = useState(1);
 
-  // Estados para mensagens de erro
   const [titleError, setTitleError] = useState('');
   const [clientError, setClientError] = useState('');
 
@@ -60,7 +61,6 @@ export default function BudgetNew() {
     [subtotal, discountAmount],
   );
 
-  // Limpa erros ao digitar
   const handleTitleChange = (value: string) => {
     setTitle(value);
     if (titleError) setTitleError('');
@@ -84,13 +84,16 @@ export default function BudgetNew() {
     setEditingServiceId(service.id);
     setServiceTitle(service.title);
     setServiceDescription(service.description);
-    setServiceAmount(String(service.amount));
+    setServiceAmount(
+      service.amount ? `R$ ${service.amount.toFixed(2).replace('.', ',')}` : '',
+    );
     setServiceQuantity(service.quantity);
     setIsServiceSheetOpen(true);
   };
 
   const handleSaveService = () => {
-    const amountValue = Number(serviceAmount.replace(',', '.')) || 0;
+    const amountValue = parseBRLCurrencyToNumber(serviceAmount);
+
     const payload: ServiceItem = {
       id: editingServiceId || String(Date.now()),
       title: serviceTitle.trim(),
@@ -107,6 +110,7 @@ export default function BudgetNew() {
       }
       return [...prev, payload];
     });
+
     setIsServiceSheetOpen(false);
   };
 
@@ -129,20 +133,13 @@ export default function BudgetNew() {
     setTitleError('');
     setClientError('');
 
-    const result = budgetGeneralInfoSchema.safeParse({
-      title,
-      client,
-    });
+    const result = budgetGeneralInfoSchema.safeParse({title, client});
 
     if (!result.success) {
       const errors = result.error.flatten().fieldErrors;
 
-      if (errors.title?.[0]) {
-        setTitleError(errors.title[0]);
-      }
-      if (errors.client?.[0]) {
-        setClientError(errors.client[0]);
-      }
+      if (errors.title?.[0]) setTitleError(errors.title[0]);
+      if (errors.client?.[0]) setClientError(errors.client[0]);
 
       Alert.alert(
         'Campos obrigatórios',
@@ -155,9 +152,7 @@ export default function BudgetNew() {
   };
 
   const handleSaveBudget = async () => {
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     const now = new Date().toISOString();
     await saveBudget({
@@ -172,6 +167,7 @@ export default function BudgetNew() {
       createdAt: now,
       updatedAt: now,
     });
+
     router.back();
   };
 
@@ -181,7 +177,7 @@ export default function BudgetNew() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
-        <BudgetHeader title="Orcamento" onBack={() => router.back()} />
+        <BudgetHeader title="Orçamento" onBack={() => router.back()} />
 
         <GeneralInfoSection
           title={title}

@@ -2,15 +2,19 @@ import {
   Modal,
   Pressable,
   Text,
-  TextInput,
   TouchableWithoutFeedback,
   View,
+  Alert,
 } from 'react-native';
-import {Check, Minus, Plus, TrashSimple, X} from 'phosphor-react-native';
+import {PlusIcon, TrashSimpleIcon, XIcon} from 'phosphor-react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-controller';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import MaskInput, {Masks} from 'react-native-mask-input';
+import {CheckCheckIcon, MinusIcon} from 'lucide-react-native';
 
 import theme from '@/src/Global/theme';
 import {styles} from './styles';
+import {parseBRLCurrencyToNumber} from '@/src/utils/parseBRLCurrencyToNumber';
 
 type Props = {
   visible: boolean;
@@ -43,12 +47,44 @@ export function ServiceBottomSheet({
   onDelete,
   onSave,
 }: Props) {
+  const insets = useSafeAreaInsets();
+
+  const handleSave = () => {
+    if (!title.trim()) {
+      Alert.alert('Erro', 'Informe o título do serviço');
+      return;
+    }
+
+    if (!description.trim()) {
+      Alert.alert('Erro', 'Informe a descrição do serviço');
+      return;
+    }
+
+    const amountNumber = parseBRLCurrencyToNumber(amount);
+    if (amountNumber <= 0) {
+      Alert.alert('Erro', 'Informe um valor maior que zero');
+      return;
+    }
+
+    if (quantity <= 0) {
+      Alert.alert('Erro', 'A quantidade deve ser maior que zero');
+      return;
+    }
+
+    onSave();
+  };
+
   return (
     <Modal transparent visible={visible} animationType="slide">
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.root}>
           <View style={styles.backdrop} />
-          <View style={styles.sheetContainer}>
+
+          <View
+            style={[
+              styles.sheetContainer,
+              {paddingBottom: insets.bottom + 16},
+            ]}>
             <KeyboardAwareScrollView
               style={styles.scrollView}
               contentContainerStyle={styles.contentContainer}
@@ -56,24 +92,24 @@ export function ServiceBottomSheet({
               showsVerticalScrollIndicator={false}
               bounces={false}>
               <View style={styles.header}>
-                <Text style={styles.title}>Servico</Text>
+                <Text style={styles.title}>Serviço</Text>
                 <Pressable onPress={onClose} hitSlop={12}>
-                  <X size={20} color={theme.COLORS.TEXT_MUTED} />
+                  <XIcon size={20} color={theme.COLORS.TEXT_MUTED} />
                 </Pressable>
               </View>
 
-              <TextInput
+              <MaskInput
                 value={title}
-                onChangeText={onChangeTitle}
+                onChangeText={text => onChangeTitle(text)}
                 placeholder="Design de interfaces"
                 placeholderTextColor={theme.COLORS.TEXT_MUTED}
                 style={styles.input}
               />
 
-              <TextInput
+              <MaskInput
                 value={description}
-                onChangeText={onChangeDescription}
-                placeholder="Criacao de wireframes e prototipos de alta fidelidade"
+                onChangeText={text => onChangeDescription(text)}
+                placeholder="Criação de wireframes e protótipos de alta fidelidade"
                 placeholderTextColor={theme.COLORS.TEXT_MUTED}
                 style={[styles.input, styles.textarea]}
                 multiline
@@ -81,34 +117,40 @@ export function ServiceBottomSheet({
 
               <View style={styles.row}>
                 <View style={styles.moneyField}>
-                  <Text style={styles.currency}>R$</Text>
-                  <TextInput
+                  <MaskInput
                     value={amount}
-                    onChangeText={onChangeAmount}
+                    onChangeText={masked => onChangeAmount(masked)}
+                    mask={Masks.BRL_CURRENCY}
+                    keyboardType="numeric"
                     placeholder="0,00"
                     placeholderTextColor={theme.COLORS.TEXT_MUTED}
-                    keyboardType="numeric"
                     style={styles.moneyInput}
                   />
                 </View>
 
                 <View style={styles.qtyField}>
                   <Pressable style={styles.qtyButton} onPress={onDecreaseQty}>
-                    <Minus size={16} color={theme.COLORS.PURPLE_BASE} />
+                    <MinusIcon size={16} color={theme.COLORS.PURPLE_BASE} />
                   </Pressable>
+
                   <Text style={styles.qtyText}>{quantity}</Text>
+
                   <Pressable style={styles.qtyButton} onPress={onIncreaseQty}>
-                    <Plus size={16} color={theme.COLORS.PURPLE_BASE} />
+                    <PlusIcon size={16} color={theme.COLORS.PURPLE_BASE} />
                   </Pressable>
                 </View>
               </View>
 
               <View style={styles.actions}>
                 <Pressable style={styles.deleteButton} onPress={onDelete}>
-                  <TrashSimple size={18} color={theme.COLORS.DANGER_BASE} />
+                  <TrashSimpleIcon size={18} color={theme.COLORS.DANGER_BASE} />
                 </Pressable>
-                <Pressable style={styles.saveButton} onPress={onSave}>
-                  <Check size={18} color={theme.COLORS.BACKGROUND_ELEVATED} />
+
+                <Pressable style={styles.saveButton} onPress={handleSave}>
+                  <CheckCheckIcon
+                    size={18}
+                    color={theme.COLORS.BACKGROUND_ELEVATED}
+                  />
                   <Text style={styles.saveButtonText}>Salvar</Text>
                 </Pressable>
               </View>

@@ -1,7 +1,7 @@
 import {useCallback, useMemo, useState} from 'react';
 import {Pressable, ScrollView, Text, View} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {FunnelSimple, Plus} from 'phosphor-react-native';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {FunnelSimpleIcon, PlusIcon} from 'phosphor-react-native';
 import {useRouter} from 'expo-router';
 import {useFocusEffect} from '@react-navigation/native';
 
@@ -15,7 +15,9 @@ import {BudgetStatus, SortOption} from '@/src/Interfaces/HomeInterfaces';
 import {getBudgets} from '@/src/storage/budgets';
 
 export default function Home() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
+
   const [budgets, setBudgets] = useState<
     {
       id: string;
@@ -97,7 +99,10 @@ export default function Home() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {paddingBottom: insets.bottom},
+        ]}
         showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <View>
@@ -111,7 +116,7 @@ export default function Home() {
           <Pressable
             style={styles.newButton}
             onPress={() => router.push('Main/BudgetNew')}>
-            <Plus
+            <PlusIcon
               size={18}
               color={theme.COLORS.BACKGROUND_ELEVATED}
               weight="bold"
@@ -125,7 +130,7 @@ export default function Home() {
           <IconButton
             onPress={() => setIsSheetOpen(true)}
             style={styles.filterButton}>
-            <FunnelSimple
+            <FunnelSimpleIcon
               size={22}
               color={theme.COLORS.ACCENT_BRAND}
               weight="bold"

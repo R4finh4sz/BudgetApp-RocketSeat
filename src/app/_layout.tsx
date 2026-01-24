@@ -7,6 +7,7 @@ import {
 } from '@expo-google-fonts/open-sans';
 import {useEffect} from 'react';
 import {KeyboardProvider} from 'react-native-keyboard-controller';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,14 +28,16 @@ export default function RootLayout() {
   }
 
   return (
-    <KeyboardProvider>
-      <StatusBar style="dark" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: 'slide_from_right',
-        }}
-      />
-    </KeyboardProvider>
+    <SafeAreaProvider>
+      <KeyboardProvider>
+        <StatusBar style="dark" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: 'slide_from_right',
+          }}
+        />
+      </KeyboardProvider>
+    </SafeAreaProvider>
   );
 }

@@ -1,9 +1,11 @@
-import {Pressable, Text, View} from 'react-native';
-import {Briefcase, PlusIcon} from 'phosphor-react-native';
+// ServicesSection.tsx
+import {Pressable, Text} from 'react-native';
+import {PlusIcon} from 'phosphor-react-native';
 import theme from '@/src/Global/theme';
 import {FormSection} from '@/src/components/ui/FormSection';
 import {ServiceItemRow} from '@/src/components/ui/ServiceItemRow';
 import {styles} from '@/src/app/Main/BudgetNew/styles';
+import {BriefcaseBusinessIcon} from 'lucide-react-native';
 
 type ServiceItem = {
   id: string;
@@ -26,8 +28,10 @@ export function ServicesSection({
 }: Props) {
   return (
     <FormSection
-      title="Servicos inclusos"
-      icon={<Briefcase size={16} color={theme.COLORS.PURPLE_BASE} />}>
+      title="Serviços inclusos"
+      icon={
+        <BriefcaseBusinessIcon size={16} color={theme.COLORS.PURPLE_BASE} />
+      }>
       {services.map((service, index) => (
         <ServiceItemRow
           key={service.id}
@@ -39,9 +43,10 @@ export function ServicesSection({
           onEdit={() => onEditService(service)}
         />
       ))}
+
       <Pressable style={styles.addButton} onPress={onAddService}>
         <PlusIcon size={18} color={theme.COLORS.PURPLE_BASE} />
-        <Text style={styles.addButtonText}>Adicionar servico</Text>
+        <Text style={styles.addButtonText}>Adicionar serviço</Text>
       </Pressable>
     </FormSection>
   );

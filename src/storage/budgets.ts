@@ -1,9 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {BudgetStatus} from '@/src/Interfaces/HomeInterfaces';
 
-const STORAGE_KEY = '@budget:items';
+const KEY = '@budgets';
 
-type ServiceItem = {
+export type BudgetStatus = 'draft' | 'approved' | 'sent' | 'rejected';
+
+export type ServiceItem = {
   id: string;
   title: string;
   description: string;
@@ -11,28 +12,61 @@ type ServiceItem = {
   quantity: number;
 };
 
-export type BudgetRecord = {
+export type BudgetStored = {
   id: string;
   title: string;
   client: string;
   status: BudgetStatus;
   services: ServiceItem[];
-  discountPercent: number;
-  discountAmount: number;
+  discountPercent?: number;
+  discountAmount?: number;
   total: number;
   createdAt: string;
   updatedAt: string;
 };
 
-export async function getBudgets() {
-  const raw = await AsyncStorage.getItem(STORAGE_KEY);
-  if (!raw) return [] as BudgetRecord[];
-  return JSON.parse(raw) as BudgetRecord[];
+export async function getBudgets(): Promise<BudgetStored[]> {
+  const raw = await AsyncStorage.getItem(KEY);
+  return raw ? (JSON.parse(raw) as BudgetStored[]) : [];
 }
 
-export async function saveBudget(budget: BudgetRecord) {
-  const current = await getBudgets();
-  const next = [budget, ...current];
-  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  return budget;
+export async function saveBudget(budget: BudgetStored): Promise<void> {
+  const all = await getBudgets();
+  const next = [budget, ...all];
+  await AsyncStorage.setItem(KEY, JSON.stringify(next));
+}
+
+export async function updateBudget(updated: BudgetStored): Promise<void> {
+  const all = await getBudgets();
+  const next = all.map(b =>
+    String(b.id) === String(updated.id) ? updated : b,
+  );
+  await AsyncStorage.setItem(KEY, JSON.stringify(next));
+}
+
+export async function deleteBudget(id: string): Promise<void> {
+  const all = await getBudgets();
+  const next = all.filter(b => String(b.id) !== String(id));
+  await AsyncStorage.setItem(KEY, JSON.stringify(next));
+}
+
+export async function duplicateBudget(
+  id: string,
+): Promise<BudgetStored | null> {
+  const all = await getBudgets();
+  const original = all.find(b => String(b.id) === String(id));
+  if (!original) return null;
+
+  const now = new Date().toISOString();
+  const copy: BudgetStored = {
+    ...original,
+    id: String(Date.now()),
+    title: `${original.title} (cópia)`,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const next = [copy, ...all];
+  await AsyncStorage.setItem(KEY, JSON.stringify(next));
+  return copy;
 }
